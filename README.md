@@ -9,7 +9,7 @@ Este projeto utiliza um sensor IMU (Inertial Measurement Unit) para controlar do
 
 ## Índice
 
-- [Visão Geral](#visão-geral))
+- [Visão Geral](#visão-geral)
 - [Estrutura do Código](#estrutura-do-código)
 - [Funcionalidades do Projeto](#funcionalidades-do-projeto)
 - [Dependências](#dependências)

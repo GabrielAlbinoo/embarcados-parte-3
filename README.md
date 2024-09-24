@@ -51,22 +51,6 @@ O código principal é composto por:
 7. **Tratamento de Erros**:
    - Implementa verificação de erros ao inicializar os servos e ao ler os dados do sensor, garantindo robustez no funcionamento.
 
-
-### Estrutura de Diretórios
-```
-/project
-│
-├── src
-│   ├── main.c               # Código principal
-│   ├── imu_tools.h          # Funções e definições relacionadas ao IMU
-│   ├── sensor_imu.h         # Definições do sensor IMU
-│   └── servo_tools.h        # Funções e definições para controle de servos
-│
-├── include                   # Diretório para arquivos de cabeçalho
-│
-└── README.md                 # Este arquivo
-```
-
 ## Dependências
 
 Este projeto depende das seguintes bibliotecas:

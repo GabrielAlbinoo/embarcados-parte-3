@@ -3,18 +3,23 @@
 #include "imu_tools.h"
 #include "sensor_imu.h"
 #include "servo_tools.h"
+#include "servo_hw.h"
 #include <math.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
-int map_angle(float angle) {
+int map_angle(float angle)
+{
     float degrees = angle * (180.0 / M_PI);
 
-    int mapped_angle = (int)(degrees + 180) / 2;
-    
-    if (mapped_angle < 0) {
+    int mapped_angle = (int)(degrees + 90);
+
+    if (mapped_angle < 0)
+    {
         mapped_angle = 0;
-    } else if (mapped_angle > 180) {
+    }
+    else if (mapped_angle > 180)
+    {
         mapped_angle = 180;
     }
 
@@ -49,12 +54,20 @@ void app_main(void)
         return;
     }
 
+    ret = imu_init(0x68, GPIO_NUM_21, GPIO_NUM_22);
+    if (ret != ESP_OK)
+    {
+        printf("Falha na inicialização do IMU.");
+        return;
+    }
+
     esp_err_t resultado;
 
     while (1)
     {
         printf("===================\n");
         IMUData sensorData;
+
         resultado = imu_read_data(&sensorData);
         if (resultado == ESP_OK)
         {
@@ -68,12 +81,14 @@ void app_main(void)
 
             float gyro_x_rad_s = gyro_data.x;
             float gyro_y_rad_s = gyro_data.y;
-            float gyro_z_rad_s = gyro_data.z ;
+            float gyro_z_rad_s = gyro_data.z;
             printf("Giroscópio (rad): x = %f, y = %f, z = %f\n", gyro_x_rad_s, gyro_y_rad_s, gyro_z_rad_s);
         }
         else
         {
             printf("Falha ao obter dados do sensor.\n");
+            break;
+
         }
 
         Quaternion quaternion;
@@ -85,6 +100,8 @@ void app_main(void)
         else
         {
             printf("Falha ao calcular o Quaternion.\n");
+            break;
+
         }
 
         EulerAngle euler_angle;
@@ -96,6 +113,7 @@ void app_main(void)
         else
         {
             printf("Falha ao calcular os ângulos de Euler.\n");
+            break;
         }
         printf("*******************\n");
         ServoAngle angle_1 = map_angle(euler_angle.roll);
@@ -124,4 +142,24 @@ void app_main(void)
 
         vTaskDelay(pdMS_TO_TICKS(100));
     }
+
+    ret = hw_servo_deinit(&servo_1.gpio_num);
+    if (ret != ESP_OK)
+    {
+        printf("Falha ao desinicializar o servo 1: %s", esp_err_to_name(ret));
+    }
+
+    ret = hw_servo_deinit(&servo_2.gpio_num);
+    if (ret != ESP_OK)
+    {
+        printf("Falha ao desinicializar o servo 2: %s", esp_err_to_name(ret));
+    }
+
+    ret = imu_deinit();
+    if (ret != ESP_OK)
+    {
+        printf("Falha ao desinicializar o IMU.");
+    }
+
+    printf("Fim do programa.\n");
 }

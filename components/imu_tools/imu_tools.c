@@ -14,10 +14,6 @@ const gpio_num_t SCL_PIN = 22;
  */
 esp_err_t imu_read_data(IMUData *data) {
     esp_err_t ret;
-    ret = imu_init(MPU6050_ADDR, SDA_PIN, SCL_PIN);
-    if (ret != ESP_OK) {
-        return ESP_FAIL;
-    }
 
     AccelerationData accel_data;
     ret = imu_get_acceleration_data(&accel_data);
@@ -33,11 +29,6 @@ esp_err_t imu_read_data(IMUData *data) {
 
     data->gyro = gyro_data;
     data->accel = accel_data;
-
-    ret = imu_deinit();
-    if (ret != ESP_OK) {
-        return ESP_FAIL;
-    }
 
     return ESP_OK;
 }

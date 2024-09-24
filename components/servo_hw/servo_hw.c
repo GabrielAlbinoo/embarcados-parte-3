@@ -71,6 +71,21 @@ esp_err_t hw_servo_init(uint8_t gpio_num) {
         return ESP_ERR_NOT_FOUND;
     }
 
+    printf("\nInicio da varredura\n");
+    // Vai de 0 a 180
+    for (int angle = 0; angle <= 180; angle += 10) { 
+        // Move o Servo para o angulo passado
+        uint32_t duty_cycle = angle_to_duty(angle);
+        hw_servo_set_pulse_width(gpio_num, duty_cycle);
+        vTaskDelay(100 / portTICK_PERIOD_MS); 
+    }
+    for (int angle = 180; angle >= 0; angle -= 10) { 
+        uint32_t duty_cycle = angle_to_duty(angle);
+        hw_servo_set_pulse_width(gpio_num, duty_cycle);
+        vTaskDelay(100 / portTICK_PERIOD_MS); 
+    }
+    printf("\nFim da varredura\n");
+
     return ESP_OK;
 
 }

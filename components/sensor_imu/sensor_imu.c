@@ -7,7 +7,15 @@
 #include <esp_err.h>
 
 #define MPU6050_ADDR            0x68             /**< Endereço padrão do MPU6050 */
+uint8_t imu_dev_addr;
+#define I2C_MASTER_NUM I2C_NUM_0          
+#define I2C_MASTER_FREQ_HZ 100000          
+#define I2C_MASTER_TX_BUF_DISABLE 0       
+#define I2C_MASTER_RX_BUF_DISABLE 0      
 
+#define MPU6050_ACCEL_XOUT_H 0x3B
+#define MPU6050_GYRO_XOUT_H 0x43
+#define MPU6050_PWR_MGMT_1 0x6B
 /**
  * @brief Inicializa o sensor IMU.
  *
@@ -16,48 +24,39 @@
  * @param scl_pin GPIO para SCL.
  * @return esp_err_t ESP_OK em caso de sucesso, ou ESP_FAIL em caso de falha.
  */
-esp_err_t imu_init(uint8_t devAddr, gpio_num_t sda_pin, gpio_num_t scl_pin)
-{
-    esp_err_t ret;
+esp_err_t imu_init(uint8_t devAddr, gpio_num_t sda_pin, gpio_num_t scl_pin) {
+    imu_dev_addr = devAddr;
 
     i2c_config_t conf = {
         .mode = I2C_MODE_MASTER,
         .sda_io_num = sda_pin,
-        .scl_io_num = scl_pin,
         .sda_pullup_en = GPIO_PULLUP_ENABLE,
+        .scl_io_num = scl_pin,
         .scl_pullup_en = GPIO_PULLUP_ENABLE,
         .master.clk_speed = I2C_MASTER_FREQ_HZ,
     };
-
-    ret = i2c_param_config(I2C_MASTER_NUM, &conf);
-    if (ret != ESP_OK) {
-        printf("Failed to configure I2C parameters\n");
-        return ESP_ERR_NOT_FOUND;
+    esp_err_t err = i2c_param_config(I2C_MASTER_NUM, &conf);
+    if (err != ESP_OK) {
+        return ESP_FAIL;
     }
 
-    ret = i2c_driver_install(I2C_MASTER_NUM, I2C_MODE_MASTER, 0, 0, 0);
-    if (ret != ESP_OK) {
-        printf("Failed to install I2C driver\n");
-        return ESP_ERR_NOT_FOUND;
+    err = i2c_driver_install(I2C_MASTER_NUM, conf.mode, I2C_MASTER_RX_BUF_DISABLE, I2C_MASTER_TX_BUF_DISABLE, 0);
+    if (err != ESP_OK) {
+        return ESP_FAIL;
     }
 
-    uint8_t who_am_i = 0;
     i2c_cmd_handle_t cmd = i2c_cmd_link_create();
     i2c_master_start(cmd);
-    i2c_master_write_byte(cmd, (devAddr << 1) | I2C_MASTER_WRITE, true);
-    i2c_master_write_byte(cmd, MPU6050_WHO_AM_I_REG, true);
-    i2c_master_start(cmd);
-    i2c_master_write_byte(cmd, (devAddr << 1) | I2C_MASTER_READ, true);
-    i2c_master_read_byte(cmd, &who_am_i, I2C_MASTER_LAST_NACK);
+    i2c_master_write_byte(cmd, (imu_dev_addr << 1) | I2C_MASTER_WRITE, true);
+    i2c_master_write_byte(cmd, MPU6050_PWR_MGMT_1, true);
+    i2c_master_write_byte(cmd, 0x00, true);
     i2c_master_stop(cmd);
-    ret = i2c_master_cmd_begin(I2C_MASTER_NUM, cmd, pdMS_TO_TICKS(1000));
+    err = i2c_master_cmd_begin(I2C_MASTER_NUM, cmd, pdMS_TO_TICKS(1000));
     i2c_cmd_link_delete(cmd);
 
-    if (ret == ESP_OK && who_am_i == 0x68) {
-        printf("MPU6050 found and initialized\n");
+    if (err == ESP_OK) {
         return ESP_OK;
     } else {
-        printf("MPU6050 not found or initialization failed\n");
         return ESP_ERR_NOT_FOUND;
     }
 }

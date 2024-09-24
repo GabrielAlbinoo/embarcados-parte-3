@@ -192,6 +192,9 @@ Este projeto utiliza várias APIs para interagir com o sensor IMU e controlar os
 
 Essas APIs permitem a interação eficaz entre o software e o hardware, possibilitando o controle dos servos com base nos dados do sensor IMU.
 
+### Documentação
+[Documentação](https://docs.google.com/document/d/1ehZx7MRxHarA1N_aalE3D_Jn-jmAyVCmxsuGigXngUs/edit?usp=sharing)
+
 #### Equipe:
 
 - Álisson Leandro de Souza Silva;

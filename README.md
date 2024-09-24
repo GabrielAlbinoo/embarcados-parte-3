@@ -115,6 +115,10 @@ Para compilar e executar este projeto, siga os passos abaixo:
    ```bash
    idf.py monitor
     ```
+
+### Diagrama de Blocos
+![Diagrama](progt.png)
+
 ## Uso
 Após a inicialização do sistema, os servos se moverão de acordo com os ângulos de Euler medidos pelo IMU. Certifique-se de que o sensor está corretamente conectado e configurado.
 
